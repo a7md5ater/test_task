@@ -50,7 +50,7 @@ class TestHelpers {
 
     final decoration = container.decoration;
     if (decoration is BoxDecoration && decoration.color != null) {
-      return decoration.color!;
+      return decoration.color ?? Colors.transparent;
     }
     return Colors.transparent;
   }
@@ -66,7 +66,8 @@ class TestHelpers {
   static String getHexColorText(WidgetTester tester) {
     final Finder hexFinder = find.byWidgetPredicate((widget) {
       if (widget is Text && widget.data != null) {
-        final String text = widget.data!;
+        final String? text = widget.data;
+        if (text == null) return false;
 
         return text.startsWith('#') &&
             text.length == TestConstants.hexColorLength;
@@ -90,7 +91,7 @@ class TestHelpers {
   }
 
   /// Verifies initial app state
-  static void verifyInitialState(WidgetTester tester) {
+  static void verifyInitialState() {
     expect(find.text(TestConstants.helloThereText), findsOneWidget);
     expect(find.text('${TestConstants.tapsPrefix} 0'), findsOneWidget);
     expect(find.text(TestConstants.resetButtonText), findsOneWidget);
@@ -106,7 +107,7 @@ void main() {
     ) async {
       await tester.pumpWidget(const ColorTapApp());
 
-      TestHelpers.verifyInitialState(tester);
+      TestHelpers.verifyInitialState();
     });
   });
 
@@ -184,7 +185,8 @@ void main() {
 
       final Finder hexColorFinder = find.byWidgetPredicate((widget) {
         if (widget is Text && widget.data != null) {
-          final String text = widget.data!;
+          final String? text = widget.data;
+          if (text == null) return false;
 
           return text.startsWith('#') &&
               text.length == TestConstants.hexColorLength;
