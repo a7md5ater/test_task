@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 /// Widget that displays the reset button at the top-right of the screen.
@@ -13,8 +14,17 @@ class ResetButton extends StatelessWidget {
     return Positioned(
       top: 60,
       right: 20,
-      child: GestureDetector(
-        onTap: onReset,
+      child: RawGestureDetector(
+        behavior: HitTestBehavior.opaque,
+        gestures: <Type, GestureRecognizerFactory>{
+          TapGestureRecognizer:
+              GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+                TapGestureRecognizer.new,
+                (TapGestureRecognizer instance) {
+                  instance.onTap = onReset;
+                },
+              ),
+        },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(

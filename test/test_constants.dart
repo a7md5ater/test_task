@@ -9,7 +9,7 @@ class TestConstants {
   static const String resetButtonText = 'Reset';
   static const String currentColorText = 'Current Color';
   static const int expectedPositionedWidgets = 4;
-  static const int expectedGestureDetectors = 2;
+  static const int expectedGestureDetectors = 1;
   static const int hexColorLength = 7;
   static const double initialAnimationScale = 1.0;
 }

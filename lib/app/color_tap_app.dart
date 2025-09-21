@@ -13,15 +13,12 @@ class ColorTapApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Color Tap Challenge',
-      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
-      home: BlocProvider(
-        // ignore: avoid_unused_parameters
-        create: (_) => ColorTapCubit(),
-        child: const ColorTapScreen(),
+    return BlocProvider(
+      create: (_) => ColorTapCubit(),
+      child: const Directionality(
+        textDirection: TextDirection.ltr,
+        child: ColorTapScreen(),
       ),
-      debugShowCheckedModeBanner: false,
     );
   }
 }

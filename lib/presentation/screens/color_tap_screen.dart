@@ -16,34 +16,35 @@ class ColorTapScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: BlocBuilder<ColorTapCubit, ColorTapState>(
-        builder: (context, state) {
-          final cubit = context.read<ColorTapCubit>();
+    return BlocBuilder<ColorTapCubit, ColorTapState>(
+      builder: (context, state) {
+        final cubit = context.read<ColorTapCubit>();
 
-          return GestureDetector(
-            onTap: cubit.handleTap,
-            child: AnimatedContainer(
-              duration: ColorTapCubit.animationDuration,
-              curve: Curves.easeInOut,
-              width: double.infinity,
-              height: double.infinity,
-              color: state.backgroundColor,
-              child: Stack(
-                children: [
-                  HelloThereText(
+        return GestureDetector(
+          behavior: HitTestBehavior.deferToChild,
+          onTap: cubit.handleTap,
+          child: AnimatedContainer(
+            duration: ColorTapCubit.animationDuration,
+            curve: Curves.easeInOut,
+            width: double.infinity,
+            height: double.infinity,
+            color: state.backgroundColor,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: HelloThereText(
                     textColor: state.textColor,
                     animationScale: state.animationScale,
                   ),
-                  TapCounter(tapCount: state.tapCounter),
-                  ResetButton(onReset: cubit.reset),
-                  CurrentColor(hexColor: state.hexColor),
-                ],
-              ),
+                ),
+                TapCounter(tapCount: state.tapCounter),
+                ResetButton(onReset: cubit.reset),
+                CurrentColor(hexColor: state.hexColor),
+              ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
