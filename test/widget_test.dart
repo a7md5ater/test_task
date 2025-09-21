@@ -2,38 +2,125 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:test_task/app/color_tap_app.dart';
 
-void main() {
-  group('Color Tap App Tests', () {
-    testWidgets('Initial state verification', (WidgetTester tester) async {
-      // Build our app and trigger a frame.
-      await tester.pumpWidget(const ColorTapApp());
+/// Test constants
+class TestConstants {
+  static const int multipleTestTaps = 5;
+  static const int rapidTapCount = 10;
+  static const int colorTestIterations = 5;
+  static const String initialHexColor = '#FFFFFF';
+  static const String helloThereText = 'Hello there';
+  static const String tapsPrefix = 'Taps:';
+  static const String resetButtonText = 'Reset';
+  static const String currentColorText = 'Current Color';
+  static const int expectedPositionedWidgets = 4;
+  static const int expectedGestureDetectors = 2;
+  static const int hexColorLength = 7;
+  static const double initialAnimationScale = 1.0;
+}
 
-      // Verify initial state
-      expect(find.text('Hello there'), findsOneWidget);
-      expect(find.text('Taps: 0'), findsOneWidget);
-      expect(find.text('Reset'), findsOneWidget);
-      expect(find.text('Current Color'), findsOneWidget);
-      expect(
-        find.text('#FFFFFF'),
-        findsOneWidget,
-      ); // White background initially
+/// Test helper functions
+class TestHelpers {
+  /// Performs multiple taps on the screen
+  static Future<void> performMultipleTaps(
+    WidgetTester tester,
+    int numberOfTaps,
+  ) async {
+    for (int i = 0; i < numberOfTaps; i++) {
+      await tester.tap(find.byType(GestureDetector));
+      await tester.pumpAndSettle();
+    }
+  }
+
+  /// Performs rapid taps without waiting for settle
+  static Future<void> performRapidTaps(
+    WidgetTester tester,
+    int numberOfTaps,
+  ) async {
+    for (int i = 0; i < numberOfTaps; i++) {
+      await tester.tap(find.byType(GestureDetector));
+      await tester.pump();
+    }
+  }
+
+  /// Gets the background color from AnimatedContainer
+  static Color getBackgroundColor(WidgetTester tester) {
+    final AnimatedContainer container = tester.widget<AnimatedContainer>(
+      find.byType(AnimatedContainer),
+    );
+
+    final decoration = container.decoration;
+    if (decoration is BoxDecoration && decoration.color != null) {
+      return decoration.color!;
+    }
+    return Colors.transparent;
+  }
+
+  /// Validates hex color format
+  static bool isValidHexColor(String hexColor) {
+    final RegExp hexPattern = RegExp(r'^#[0-9A-F]{6}$');
+
+    return hexPattern.hasMatch(hexColor);
+  }
+
+  /// Finds hex color widget and returns its text
+  static String getHexColorText(WidgetTester tester) {
+    final Finder hexFinder = find.byWidgetPredicate((widget) {
+      if (widget is Text && widget.data != null) {
+        final String text = widget.data!;
+
+        return text.startsWith('#') &&
+            text.length == TestConstants.hexColorLength;
+      }
+
+      return false;
     });
 
-    testWidgets('Tap functionality increments counter', (
+    final Text hexWidget = tester.widget<Text>(hexFinder);
+
+    return hexWidget.data ?? '';
+  }
+
+  /// Gets text color from main text widget
+  static Color getMainTextColor(WidgetTester tester) {
+    final Text textWidget = tester.widget<Text>(
+      find.text(TestConstants.helloThereText),
+    );
+
+    return textWidget.style?.color ?? Colors.transparent;
+  }
+
+  /// Verifies initial app state
+  static void verifyInitialState(WidgetTester tester) {
+    expect(find.text(TestConstants.helloThereText), findsOneWidget);
+    expect(find.text('${TestConstants.tapsPrefix} 0'), findsOneWidget);
+    expect(find.text(TestConstants.resetButtonText), findsOneWidget);
+    expect(find.text(TestConstants.currentColorText), findsOneWidget);
+    expect(find.text(TestConstants.initialHexColor), findsOneWidget);
+  }
+}
+
+void main() {
+  group('Color Tap App - Initial State Tests', () {
+    testWidgets('App displays correct initial state', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(const ColorTapApp());
 
-      // Verify initial counter
-      expect(find.text('Taps: 0'), findsOneWidget);
+      TestHelpers.verifyInitialState(tester);
+    });
+  });
 
-      // Tap the screen once
+  group('Color Tap App - Counter Tests', () {
+    testWidgets('Single tap increments counter', (WidgetTester tester) async {
+      await tester.pumpWidget(const ColorTapApp());
+
+      expect(find.text('${TestConstants.tapsPrefix} 0'), findsOneWidget);
+
       await tester.tap(find.byType(GestureDetector));
       await tester.pumpAndSettle();
 
-      // Verify counter incremented
-      expect(find.text('Taps: 1'), findsOneWidget);
-      expect(find.text('Taps: 0'), findsNothing);
+      expect(find.text('${TestConstants.tapsPrefix} 1'), findsOneWidget);
+      expect(find.text('${TestConstants.tapsPrefix} 0'), findsNothing);
     });
 
     testWidgets('Multiple taps increment counter correctly', (
@@ -41,151 +128,196 @@ void main() {
     ) async {
       await tester.pumpWidget(const ColorTapApp());
 
-      // Tap multiple times
-      const int numberOfTaps = 5;
-      for (int i = 0; i < numberOfTaps; i++) {
-        await tester.tap(find.byType(GestureDetector));
-        await tester.pumpAndSettle();
-      }
-
-      // Verify final counter value
-      expect(find.text('Taps: $numberOfTaps'), findsOneWidget);
-    });
-
-    testWidgets('Background color changes on tap', (WidgetTester tester) async {
-      await tester.pumpWidget(const ColorTapApp());
-
-      // Get initial background color
-      final AnimatedContainer initialContainer = tester
-          .widget<AnimatedContainer>(find.byType(AnimatedContainer));
-      final BoxDecoration? initialDecoration =
-          initialContainer.decoration as BoxDecoration?;
-      final Color initialColor = initialDecoration?.color ?? Colors.transparent;
-
-      // Tap the screen
-      await tester.tap(find.byType(GestureDetector));
-      await tester.pumpAndSettle();
-
-      // Get new background color
-      final AnimatedContainer newContainer = tester.widget<AnimatedContainer>(
-        find.byType(AnimatedContainer),
+      await TestHelpers.performMultipleTaps(
+        tester,
+        TestConstants.multipleTestTaps,
       );
-      final BoxDecoration? newDecoration =
-          newContainer.decoration as BoxDecoration?;
-      final Color newColor = newDecoration?.color ?? Colors.transparent;
 
-      // Verify color changed (though we can't predict the exact color)
-      expect(newColor != initialColor, true);
+      expect(
+        find.text(
+          '${TestConstants.tapsPrefix} ${TestConstants.multipleTestTaps}',
+        ),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('Color hex display updates on tap', (
+    testWidgets('Rapid taps are handled correctly', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(const ColorTapApp());
 
-      // Verify initial hex color
-      expect(find.text('#FFFFFF'), findsOneWidget);
+      await TestHelpers.performRapidTaps(tester, TestConstants.rapidTapCount);
+      await tester.pumpAndSettle();
 
-      // Tap the screen
+      expect(
+        find.text('${TestConstants.tapsPrefix} ${TestConstants.rapidTapCount}'),
+        findsOneWidget,
+      );
+    });
+  });
+
+  group('Color Tap App - Color Tests', () {
+    testWidgets('Background color changes on tap', (WidgetTester tester) async {
+      await tester.pumpWidget(const ColorTapApp());
+
+      final Color initialColor = TestHelpers.getBackgroundColor(tester);
+
       await tester.tap(find.byType(GestureDetector));
       await tester.pumpAndSettle();
 
-      // Verify hex color changed (should no longer be white)
-      expect(find.text('#FFFFFF'), findsNothing);
+      final Color newColor = TestHelpers.getBackgroundColor(tester);
 
-      // Find any hex color pattern (starts with #)
+      expect(newColor != initialColor, true);
+    });
+
+    testWidgets('Hex color display updates correctly', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const ColorTapApp());
+
+      expect(find.text(TestConstants.initialHexColor), findsOneWidget);
+
+      await tester.tap(find.byType(GestureDetector));
+      await tester.pumpAndSettle();
+
+      expect(find.text(TestConstants.initialHexColor), findsNothing);
+
       final Finder hexColorFinder = find.byWidgetPredicate((widget) {
         if (widget is Text && widget.data != null) {
-          return widget.data!.startsWith('#') && widget.data!.length == 7;
+          final String text = widget.data!;
+
+          return text.startsWith('#') &&
+              text.length == TestConstants.hexColorLength;
         }
+
         return false;
       });
       expect(hexColorFinder, findsOneWidget);
     });
 
-    testWidgets('Reset button functionality', (WidgetTester tester) async {
-      await tester.pumpWidget(const ColorTapApp());
-
-      // Tap screen multiple times to change state
-      const int numberOfTaps = 3;
-      for (int i = 0; i < numberOfTaps; i++) {
-        await tester.tap(find.byType(GestureDetector));
-        await tester.pumpAndSettle();
-      }
-
-      // Verify state changed
-      expect(find.text('Taps: $numberOfTaps'), findsOneWidget);
-      expect(find.text('#FFFFFF'), findsNothing);
-
-      // Tap reset button
-      await tester.tap(find.text('Reset'));
-      await tester.pumpAndSettle();
-
-      // Verify state reset
-      expect(find.text('Taps: 0'), findsOneWidget);
-      expect(find.text('#FFFFFF'), findsOneWidget);
-    });
-
-    testWidgets('Reset button resets background color', (
+    testWidgets('Generated colors are valid hex format', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(const ColorTapApp());
 
-      // Tap screen to change color
+      for (int i = 0; i < TestConstants.colorTestIterations; i++) {
+        await tester.tap(find.byType(GestureDetector));
+        await tester.pumpAndSettle();
+
+        final String hexColor = TestHelpers.getHexColorText(tester);
+        final bool isValid = TestHelpers.isValidHexColor(hexColor);
+
+        expect(
+          isValid,
+          true,
+          reason: 'Generated color $hexColor should be valid hex',
+        );
+      }
+    });
+  });
+
+  group('Color Tap App - Reset Tests', () {
+    testWidgets('Reset button resets counter', (WidgetTester tester) async {
+      await tester.pumpWidget(const ColorTapApp());
+
+      await TestHelpers.performMultipleTaps(
+        tester,
+        TestConstants.multipleTestTaps,
+      );
+
+      expect(
+        find.text(
+          '${TestConstants.tapsPrefix} ${TestConstants.multipleTestTaps}',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text(TestConstants.resetButtonText));
+      await tester.pumpAndSettle();
+
+      expect(find.text('${TestConstants.tapsPrefix} 0'), findsOneWidget);
+    });
+
+    testWidgets('Reset button restores initial color', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const ColorTapApp());
+
       await tester.tap(find.byType(GestureDetector));
       await tester.pumpAndSettle();
 
-      // Tap reset button
-      await tester.tap(find.text('Reset'));
+      expect(find.text(TestConstants.initialHexColor), findsNothing);
+
+      await tester.tap(find.text(TestConstants.resetButtonText));
       await tester.pumpAndSettle();
 
-      // Verify background is back to white
-      final AnimatedContainer container = tester.widget<AnimatedContainer>(
-        find.byType(AnimatedContainer),
-      );
-      final BoxDecoration? decoration = container.decoration as BoxDecoration?;
-      expect(decoration?.color, equals(Colors.white));
+      expect(find.text(TestConstants.initialHexColor), findsOneWidget);
+
+      final Color backgroundColor = TestHelpers.getBackgroundColor(tester);
+      expect(backgroundColor, equals(Colors.white));
     });
 
-    testWidgets('UI elements are positioned correctly', (
+    testWidgets('Reset works when already at initial state', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(const ColorTapApp());
 
-      // Check that all main UI elements are present
+      await tester.tap(find.text(TestConstants.resetButtonText));
+      await tester.pumpAndSettle();
+
+      expect(find.text('${TestConstants.tapsPrefix} 0'), findsOneWidget);
+      expect(find.text(TestConstants.initialHexColor), findsOneWidget);
+    });
+  });
+
+  group('Color Tap App - UI Structure Tests', () {
+    testWidgets('All UI elements are positioned correctly', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const ColorTapApp());
+
       expect(find.byType(Stack), findsOneWidget);
       expect(
         find.byType(Positioned),
-        findsNWidgets(4),
-      ); // Counter, Reset, ColorInfo, MainText
+        findsNWidgets(TestConstants.expectedPositionedWidgets),
+      );
       expect(
         find.byType(GestureDetector),
-        findsNWidgets(2),
-      ); // Screen tap + Reset button
+        findsNWidgets(TestConstants.expectedGestureDetectors),
+      );
     });
 
-    testWidgets('Text contrast changes with background', (
+    testWidgets('UI maintains structure after interactions', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(const ColorTapApp());
 
-      // Get initial text widget
-      final Text initialText = tester.widget<Text>(find.text('Hello there'));
-      final Color initialTextColor = initialText.style!.color!;
+      await tester.tap(find.byType(GestureDetector));
+      await tester.pumpAndSettle();
 
-      // For white background, text should be black
+      expect(find.text(TestConstants.helloThereText), findsOneWidget);
+      expect(find.textContaining(TestConstants.tapsPrefix), findsOneWidget);
+      expect(find.text(TestConstants.resetButtonText), findsOneWidget);
+      expect(find.text(TestConstants.currentColorText), findsOneWidget);
+      expect(find.textContaining('#'), findsOneWidget);
+    });
+  });
+
+  group('Color Tap App - Accessibility Tests', () {
+    testWidgets('Text color provides good contrast', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const ColorTapApp());
+
+      final Color initialTextColor = TestHelpers.getMainTextColor(tester);
       expect(initialTextColor, equals(Colors.black));
 
-      // Tap multiple times to potentially get a dark background
-      // Note: This test might be flaky due to random colors, but demonstrates the concept
-      for (int i = 0; i < 10; i++) {
+      for (int i = 0; i < TestConstants.colorTestIterations; i++) {
         await tester.tap(find.byType(GestureDetector));
         await tester.pumpAndSettle();
 
-        final Text currentText = tester.widget<Text>(find.text('Hello there'));
-        final Color currentTextColor = currentText.style!.color!;
+        final Color currentTextColor = TestHelpers.getMainTextColor(tester);
 
-        // Text color should be either black or white (good contrast)
         expect(
           currentTextColor == Colors.black || currentTextColor == Colors.white,
           true,
@@ -194,104 +326,20 @@ void main() {
         );
       }
     });
-
-    testWidgets('Animation scale effect works', (WidgetTester tester) async {
-      await tester.pumpWidget(const ColorTapApp());
-
-      // Find the AnimatedScale widget
-      expect(find.byType(AnimatedScale), findsOneWidget);
-
-      // The scale should initially be 1.0 (not animating)
-      final AnimatedScale initialScale = tester.widget<AnimatedScale>(
-        find.byType(AnimatedScale),
-      );
-      expect(initialScale.scale, equals(1.0));
-    });
-
-    testWidgets('App handles rapid taps correctly', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(const ColorTapApp());
-
-      // Rapidly tap multiple times
-      const int rapidTaps = 10;
-      for (int i = 0; i < rapidTaps; i++) {
-        await tester.tap(find.byType(GestureDetector));
-        // Don't wait for settle to simulate rapid tapping
-        await tester.pump();
-      }
-
-      // Wait for all animations to complete
-      await tester.pumpAndSettle();
-
-      // Counter should still be accurate
-      expect(find.text('Taps: $rapidTaps'), findsOneWidget);
-    });
-
-    testWidgets('App maintains consistent UI structure', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(const ColorTapApp());
-
-      // Verify UI structure remains consistent after interactions
-      await tester.tap(find.byType(GestureDetector));
-      await tester.pumpAndSettle();
-
-      // Check all elements are still present
-      expect(find.text('Hello there'), findsOneWidget);
-      expect(find.textContaining('Taps:'), findsOneWidget);
-      expect(find.text('Reset'), findsOneWidget);
-      expect(find.text('Current Color'), findsOneWidget);
-      expect(find.textContaining('#'), findsOneWidget);
-    });
   });
 
-  group('Edge Case Tests', () {
-    testWidgets('App handles zero state correctly', (
+  group('Color Tap App - Animation Tests', () {
+    testWidgets('Animation scale widget is present', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(const ColorTapApp());
 
-      // Reset when already at zero
-      await tester.tap(find.text('Reset'));
-      await tester.pumpAndSettle();
+      expect(find.byType(AnimatedScale), findsOneWidget);
 
-      // Should still show correct initial state
-      expect(find.text('Taps: 0'), findsOneWidget);
-      expect(find.text('#FFFFFF'), findsOneWidget);
-    });
-
-    testWidgets('Color generation produces valid hex colors', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(const ColorTapApp());
-
-      // Test multiple color generations
-      for (int i = 0; i < 5; i++) {
-        await tester.tap(find.byType(GestureDetector));
-        await tester.pumpAndSettle();
-
-        // Find hex color text and validate format
-        final Finder hexFinder = find.byWidgetPredicate((widget) {
-          if (widget is Text && widget.data != null) {
-            final String text = widget.data!;
-            return text.startsWith('#') && text.length == 7;
-          }
-          return false;
-        });
-
-        expect(hexFinder, findsOneWidget);
-
-        // Get the hex string and validate it's a valid hex color
-        final Text hexWidget = tester.widget<Text>(hexFinder);
-        final String hexColor = hexWidget.data!;
-        final bool isValidHex = RegExp(r'^#[0-9A-F]{6}$').hasMatch(hexColor);
-        expect(
-          isValidHex,
-          true,
-          reason: 'Generated color $hexColor should be valid hex',
-        );
-      }
+      final AnimatedScale scaleWidget = tester.widget<AnimatedScale>(
+        find.byType(AnimatedScale),
+      );
+      expect(scaleWidget.scale, equals(TestConstants.initialAnimationScale));
     });
   });
 }
