@@ -135,6 +135,7 @@ Color _generateRandomColor() {
 ## 📱 Screenshots
 
 | Initial State | Color Changed | Reset Action |
+
 <img width="620" height="1280" alt="Screenshot_20250921-024221" src="https://github.com/user-attachments/assets/54db05e6-616f-45c6-b6cf-fe00a22ea2a8" />
 <img width="620" height="1280" alt="Screenshot_20250921-024210" src="https://github.com/user-attachments/assets/a5cd9167-6063-4f77-9496-df99b8727946" />
 <img width="620" height="1280" alt="Screenshot_20250921-024157" src="https://github.com/user-attachments/assets/40017088-8fb0-40a1-95d5-7a771472345e" />
