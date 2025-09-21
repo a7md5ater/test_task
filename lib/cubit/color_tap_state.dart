@@ -22,6 +22,13 @@ class ColorTapState {
   /// Whether the tap animation is currently playing.
   final bool isAnimating;
 
+  @override
+  int get hashCode {
+    return backgroundColor.hashCode ^
+        tapCounter.hashCode ^
+        isAnimating.hashCode;
+  }
+
   /// Calculates the contrasting text color
   /// based on the background color luminance.
   Color get textColor {
@@ -32,12 +39,15 @@ class ColorTapState {
 
   /// Returns the hex representation of the current background color.
   String get hexColor {
-    final String red =
-        ((backgroundColor.value >> 16) & 0xFF).toRadixString(16).padLeft(2, '0');
-    final String green =
-        ((backgroundColor.value >> 8) & 0xFF).toRadixString(16).padLeft(2, '0');
-    final String blue =
-        (backgroundColor.value & 0xFF).toRadixString(16).padLeft(2, '0');
+    final String red = ((backgroundColor.value >> 16) & 0xFF)
+        .toRadixString(16)
+        .padLeft(2, '0');
+    final String green = ((backgroundColor.value >> 8) & 0xFF)
+        .toRadixString(16)
+        .padLeft(2, '0');
+    final String blue = (backgroundColor.value & 0xFF)
+        .toRadixString(16)
+        .padLeft(2, '0');
 
     return '#$red$green$blue'.toUpperCase();
   }
@@ -86,10 +96,5 @@ class ColorTapState {
         other.backgroundColor == backgroundColor &&
         other.tapCounter == tapCounter &&
         other.isAnimating == isAnimating;
-  }
-
-  @override
-  int get hashCode {
-    return backgroundColor.hashCode ^ tapCounter.hashCode ^ isAnimating.hashCode;
   }
 }
