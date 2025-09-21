@@ -17,7 +17,8 @@ class ColorTapApp extends StatelessWidget {
       title: 'Color Tap Challenge',
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       home: BlocProvider(
-        create: (context) => ColorTapCubit(),
+        // ignore: avoid_unused_parameters
+        create: (_) => ColorTapCubit(),
         child: const ColorTapScreen(),
       ),
       debugShowCheckedModeBanner: false,

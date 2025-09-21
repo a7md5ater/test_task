@@ -11,14 +11,17 @@ class ColorTapCubit extends Cubit<ColorTapState> {
   /// Maximum RGB color value for generating 16,777,216 colors.
   static const int _maxColorValue = 0xFFFFFF;
 
+  /// Opaque color value for setting the alpha channel to full opacity.
+  static const int _opaqueColorValue = 0xFF000000;
+
   /// Duration for tap and color transition animations.
   static const Duration animationDuration = Duration(milliseconds: 300);
 
   /// Text displayed in the center of the screen.
-  static const String displayText = "Hello there";
+  static const String displayText = 'Hello there';
 
   /// Random number generator for color generation.
-  late final math.Random _randomGenerator;
+  math.Random? _randomGenerator;
 
   /// Creates a [ColorTapCubit] with the initial state.
   ColorTapCubit() : super(ColorTapState.initial()) {
@@ -55,7 +58,8 @@ class ColorTapCubit extends Cubit<ColorTapState> {
   /// Returns a [Color] with random RGB values
   /// ensuring 16,777,216 possible combinations.
   Color _generateRandomColor() {
-    final int randomValue = _randomGenerator.nextInt(_maxColorValue + 1);
-    return Color(0xFF000000 | randomValue);
+    final int randomValue = _randomGenerator!.nextInt(_maxColorValue + 1);
+
+    return Color(_opaqueColorValue | randomValue);
   }
 }
