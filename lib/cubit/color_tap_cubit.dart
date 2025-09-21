@@ -21,12 +21,10 @@ class ColorTapCubit extends Cubit<ColorTapState> {
   static const String displayText = 'Hello there';
 
   /// Random number generator for color generation.
-  math.Random? _randomGenerator;
+  final math.Random _randomGenerator = math.Random();
 
   /// Creates a [ColorTapCubit] with the initial state.
-  ColorTapCubit() : super(ColorTapState.initial()) {
-    _randomGenerator = math.Random();
-  }
+  ColorTapCubit() : super(ColorTapState.initial());
 
   /// Handles screen tap by generating
   /// a new random color, incrementing counter, and playing animation.
@@ -58,7 +56,7 @@ class ColorTapCubit extends Cubit<ColorTapState> {
   /// Returns a [Color] with random RGB values
   /// ensuring 16,777,216 possible combinations.
   Color _generateRandomColor() {
-    final int randomValue = _randomGenerator!.nextInt(_maxColorValue + 1);
+    final int randomValue = _randomGenerator.nextInt(_maxColorValue + 1);
 
     return Color(_opaqueColorValue | randomValue);
   }

@@ -22,22 +22,6 @@ class ColorTapState {
   /// Whether the tap animation is currently playing.
   final bool isAnimating;
 
-  /// Creates a [ColorTapState] with the given parameters.
-  const ColorTapState({
-    required this.backgroundColor,
-    required this.tapCounter,
-    required this.isAnimating,
-  });
-
-  /// Initial state with default values.
-  factory ColorTapState.initial() {
-    return const ColorTapState(
-      backgroundColor: Colors.white,
-      tapCounter: 0,
-      isAnimating: false,
-    );
-  }
-
   /// Calculates the contrasting text color
   /// based on the background color luminance.
   Color get textColor {
@@ -61,6 +45,22 @@ class ColorTapState {
   /// Returns the scale value for tap animation.
   double get animationScale {
     return isAnimating ? _animationScaleAnimating : _animationScaleIdle;
+  }
+
+  /// Creates a [ColorTapState] with the given parameters.
+  const ColorTapState({
+    required this.backgroundColor,
+    required this.tapCounter,
+    required this.isAnimating,
+  });
+
+  /// Initial state with default values.
+  factory ColorTapState.initial() {
+    return const ColorTapState(
+      backgroundColor: Colors.white,
+      tapCounter: 0,
+      isAnimating: false,
+    );
   }
 
   /// Creates a copy of this state with the given fields replaced.
