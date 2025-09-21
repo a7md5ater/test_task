@@ -161,6 +161,4 @@ flutter build web --release
 # Deploy the build/web folder
 ```
 
-[Documentation](https://github.com/yourusername/flutter-color-tap-challenge/wiki)
-
 </div>
